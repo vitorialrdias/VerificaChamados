@@ -82,6 +82,9 @@ def tratarExcel() -> str:
 
 def main():
     """Processo principal"""
+    
+    logging.info("="*100)
+    logging.info("Iniciando automação...")
     inicio = datetime.now().strftime('%H:%M')
     email = os.getenv("EMAIL_DESTINATARIO")
     url_site= os.getenv("URL_SITE")

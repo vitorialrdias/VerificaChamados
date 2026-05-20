@@ -1,11 +1,10 @@
-import time, os, logging
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.edge.service import Service
 from selenium.webdriver.edge.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
+import time, os, logging, subprocess
 from dotenv import load_dotenv
 import logging
 load_dotenv()
@@ -15,6 +14,9 @@ class Navegador:
         self.driver = None
 
     def openPage(self):
+        # Fecha a janela do Edge para não ocorrer interferencia
+        subprocess.run(["taskkill", "/f", "/im", "msedge.exe"], capture_output=True)
+        
         user = os.getlogin()
         edge_path = r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"
 
