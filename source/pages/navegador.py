@@ -18,11 +18,11 @@ class Navegador:
 
         options = Options()
         options.binary_location = edge_path
+        # As opções de options abaixo possibilita o login pelo usuário profissional
         options.add_argument(f"--user-data-dir=C:/Users/{user}/AppData/Local/Microsoft/Edge/User Data")
-
-        # 🔹 escolher o perfil (geralmente Default)
         options.add_argument(r"--profile-directory=Default")
-        # 👇 MODO HIDDEN (descomente se quiser invisível)
+        
+        # MODO HIDDEN 
         options.add_argument("--headless=new")
         options.add_argument("--disable-gpu")
 
@@ -63,12 +63,19 @@ class Navegador:
                 EC.presence_of_element_located((By.ID, "iframeMain"))
             )
             self.driver.switch_to.frame(iframe)
-
-            # Agora clica no botão dentro do iframe
-            self.driver.execute_script("document.querySelector(\"button[aria-controls='table_my_queued']\").click()")
             
-            time.sleep(6)
-            return True
+            linhas = self.driver.find_elements(By.CSS_SELECTOR, "#table_my_queued tbody tr")
+            
+            if linhas:
+
+                # Agora clica no botão dentro do iframe
+                self.driver.execute_script("document.querySelector(\"button[aria-controls='table_my_queued']\").click()")
+                
+                time.sleep(5)
+                return True
+            else:
+                logging.info("Não há novos chamados para serem atendidos.")
+                return None
 
 
         except Exception as e:
