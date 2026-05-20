@@ -6,7 +6,9 @@ from selenium.webdriver.edge.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-
+from dotenv import load_dotenv
+import logging
+load_dotenv()
 class Navegador:
     def __init__(self, url=None):
         self.url = url
@@ -39,17 +41,17 @@ class Navegador:
             wait = WebDriverWait(self.driver, 20)
             time.sleep(1)
 
-            # 🔹 Botão Entrar
+            # Botão Entrar
             btn_entrar = wait.until(
-                EC.element_to_be_clickable((By.ID, "btnLogin"))
+                EC.element_to_be_clickable((By.ID, os.getenv("BTN_LOGIN")))
             )
             btn_entrar.click()
 
             time.sleep(3)
 
-            # 🔹 Botão GPS Amigo
+            # Botão acessar area dos chamados
             btn_amigo = wait.until(
-                EC.element_to_be_clickable((By.ID, "gpsamigo"))
+                EC.element_to_be_clickable((By.ID, os.getenv("BTN_CHAMADOS")))
             )
             btn_amigo.click()
 
@@ -57,18 +59,19 @@ class Navegador:
             self.driver.switch_to.window(self.driver.window_handles[-1])
             wait = WebDriverWait(self.driver, 30)
             
-            time.sleep(5)
-            # Entra no iframe
+            # Entra no iframe dos chamados
             iframe = WebDriverWait(self.driver, 20).until(
                 EC.presence_of_element_located((By.ID, "iframeMain"))
             )
             self.driver.switch_to.frame(iframe)
             
+            time.sleep(6)
             linhas = self.driver.find_elements(By.CSS_SELECTOR, "#table_my_queued tbody tr")
-            
-            if linhas:
+            linhas = len(linhas)
+            if linhas > 1:
+                logging.info(linhas)
 
-                # Agora clica no botão dentro do iframe
+                # Clica para exportar os dados dos chamados em aberto
                 self.driver.execute_script("document.querySelector(\"button[aria-controls='table_my_queued']\").click()")
                 
                 time.sleep(5)

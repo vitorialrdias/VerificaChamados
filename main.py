@@ -17,7 +17,7 @@ load_dotenv()
 setup_logging()
 
     
-def tratarChamado() -> str:
+def tratarExcel() -> str:
     """Função para formatar o nome do arquivo e retornar o dados pertinentes"""
     logging.info("Iniciando leitura do excel")
     
@@ -26,7 +26,7 @@ def tratarChamado() -> str:
 
     # Concatena o nome do usuário com o caminho da pasta desejada
     caminho_pasta = os.path.join("C:\\Users", usuario, "Downloads")
-    texto_especifico = 'GPSAmigo'
+    texto_especifico = os.getenv("FILE_NAME")
 
     # Listando todos os arquivos .excel que começam com o texto específico
     arquivos = glob.glob(f"{caminho_pasta}\\{texto_especifico}*.xlsx")
@@ -44,10 +44,9 @@ def tratarChamado() -> str:
     # Defina a pasta de destino
     caminho_destino = r'C:\CHAMADOS'
 
-    data_atual = datetime.now()
-    validade = data_atual.strftime('%d-%m-%Y')
+    data_atual = datetime.now().strftime('%d-%m-%Y')
 
-    novo_nome_arquivo = f"CHAMADOS_{validade}.xlsx"
+    novo_nome_arquivo = f"CHAMADOS_{data_atual}.xlsx"
     logging.info(f"Novo nome do arquivo: {novo_nome_arquivo}")
 
     # Construindo o novo caminho completo (pasta de destino + novo nome)
@@ -84,8 +83,9 @@ def tratarChamado() -> str:
 def main():
     """Processo principal"""
     inicio = datetime.now().strftime('%H:%M')
-    email = os.getenv("email")
-    url_site= os.getenv("url")
+    email = os.getenv("EMAIL_DESTINATARIO")
+    url_site= os.getenv("URL_SITE")
+    
     try:
         
         # Conexão com a pagina do GPS Amigo
@@ -95,7 +95,7 @@ def main():
 
         if existe_chamado:
 
-            chamados = tratarChamado()
+            chamados = tratarExcel()
             email = EnvioEmail(destinatario=email)
             header_html, linha_html = email.gerarTabelaHTML(chamados)
             html_corpo = email.htmlEmail(header_html, linha_html)
