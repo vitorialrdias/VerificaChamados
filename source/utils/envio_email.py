@@ -14,13 +14,14 @@ class EnvioEmail:
         self,
         caminho_anexo=None,
         destinatario=None,
+        conta_envio=None
         
           # 
     ):
         self.destinatarios = limpar_emails(destinatario)
         self.assunto = "Relatório - Chamados GPS Amigo"
         self.caminho_anexo = caminho_anexo
-        self.conta_envio = "vitoria.lribeiro@gpssa.com.br"
+        self.conta_envio = conta_envio
 
     def gerarTabelaHTML(self, chamados):
         try:
