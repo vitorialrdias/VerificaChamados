@@ -1,7 +1,52 @@
-import os,glob,time,shutil,logging
+import os,glob,time,shutil,logging,re, html
 from datetime import datetime
 import pandas as pd
 
+
+
+def limpar_descricao(texto: str) -> str:
+    # 1. Decodificar HTML entities (&lt;br&gt; → <br>, &#039; → ', etc.)
+    texto = html.unescape(texto)
+
+    # 2. Remover tags HTML (<br>, <ul>, <li>, <em>, etc.)
+    texto = re.sub(r'<[^>]+>', ' ', texto)
+
+    # 3. Remover linhas que são SOMENTE saudação/fechamento/separador
+    saudacoes_linha = re.compile(
+        r'^\s*('
+        r'(bom\s+dia|boa\s+tarde|boa\s+noite)'
+        r'|ol[aá][\s,!.]*(\s*tudo\s+bem[?!.]*)?'
+        r'|prezados?\s*(,|!|\(a\))?'
+        r'|pessoal\s*[,!.]?'
+        r'|por\s+favor\s*[,!.]?'
+        r'|aguardamos\s+retorno.*'
+        r'|qualquer\s+d[uú]vida.*'
+        r'|fico\s+[aà]\s+disposi[çc][aã]o.*'
+        r'|podem\s+me\s+acionar.*'
+        r'|-{3,}'               # separadores ---
+        r')\s*$',
+        flags=re.IGNORECASE | re.MULTILINE
+    )
+    texto = saudacoes_linha.sub('', texto)
+
+    # 4. Remover saudação colada ao início do conteúdo real
+    #    Ex: "Boa tarde! Solicito..." → "Solicito..."
+    texto = re.sub(
+        r'^[\s\n]*'
+        r'(bom\s+dia|boa\s+tarde|boa\s+noite|ol[aá]|prezados?\s*(\(a\))?|pessoal)'
+        r'[\s!,.:–-]+'
+        r'(?=\S)',
+        '',
+        texto,
+        flags=re.IGNORECASE
+    )
+
+    # 5. Normalizar: colapsar múltiplos espaços/newlines, strip
+    texto = re.sub(r'\n{3,}', '\n\n', texto)   # máx 2 quebras seguidas
+    texto = re.sub(r'[ \t]{2,}', ' ', texto)    # espaços duplos
+    texto = texto.strip()
+
+    return texto
 
 def tratarExcel() -> str:
     """Função para formatar o nome do arquivo e retornar o dados pertinentes"""
@@ -52,12 +97,20 @@ def tratarExcel() -> str:
             return None
         chamados = []
 
+        
         for _, row in texto.iterrows():
+            
+            
             chamados.append({
                 "n_chamado": row["N°"],
-                "descricao": str(row["DESCRIÇÃO"]).split("\n")[0].strip()[:80],
+                "data": datetime.strptime(
+                    row["DATA ABERTURA"],
+                    "%Y-%m-%d %H:%M:%S"
+                ).strftime("%d/%m"),
+                "descricao": limpar_descricao(str(row["DESCRIÇÃO"]))[:80],
                 "prioridade": row["PRIORIDADE"],
-                "solicitante": row["USUÁRIO DE ABERTURA"]
+                "solicitante": row["USUÁRIO DE ABERTURA"],
+                "status": row["STATUS"]
             })
 
         return chamados

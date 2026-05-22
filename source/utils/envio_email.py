@@ -25,11 +25,11 @@ class EnvioEmail:
 
     def gerarTabelaHTML(self, chamados):
         try:
-            colunas = ["Nº Chamado", "Resumo Descricao", "Prioridade", "Solicitante"]
+            colunas = ["Nº Chamado", "  Data  ", "Resumo Descricao", "Prioridade", "Solicitante", "Status"]
 
             header_html = (
                 "<tr>" +
-                "".join(f"<th>{col}</th>" for col in colunas) +
+                "".join(f"<th style='width:120px;'>{col}</th>" for col in colunas) +
                 "</tr>"
             )
 
@@ -39,9 +39,11 @@ class EnvioEmail:
                 linhas_html += (
                     "<tr>"
                     f"<td>{c['n_chamado']}</td>"
+                    f"<td>{c['data']}</td>"
                     f"<td>{c['descricao']}</td>"
                     f"<td>{c['prioridade']}</td>"
                     f"<td>{c['solicitante']}</td>"
+                    f"<td>{c['status']}</td>"
                     "</tr>"
                 )
 
@@ -64,24 +66,22 @@ class EnvioEmail:
             table {{
                 font-family: Century Gothic, Helvetica, Arial;
                 border-collapse: collapse;
-                width: 90%;
+                width: 100%;
                 font-size: 13px;
             }}
             th {{
-                padding: 12px;
                 text-align: left;
-                background-color: #343B43;
+                background-color: #0f1e63;
                 color: white;
             }}
             td {{
                 border: 1px solid #ddd;
-                padding: 8px;
                 background-color: #F0F8FF;
             }}
             .tit_grande {{
                 font-family: Helvetica;
                 font-size: 26px;
-                color: #191970;
+                color: #0f1e63;
             }}
             </style>
             <div class="tit_grande"><b>Chamados Power BI - GPS Amigo</b></div>

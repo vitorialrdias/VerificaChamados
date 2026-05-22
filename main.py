@@ -41,10 +41,12 @@ def main():
 
             chamados = tratarExcel()
             
-            email = EnvioEmail(destinatario=email_destino, conta_envio=email_envio)
-            header_html, linha_html = email.gerarTabelaHTML(chamados)
-            html_corpo = email.htmlEmail(header_html, linha_html)
-            envio_email = email.enviarEmail(html_corpo)
+            if chamados:
+            
+                email = EnvioEmail(destinatario=email_destino, conta_envio=email_envio)
+                header_html, linha_html = email.gerarTabelaHTML(chamados)
+                html_corpo = email.htmlEmail(header_html, linha_html)
+                envio_email = email.enviarEmail(html_corpo)
 
         final = datetime.now().strftime('%H:%M')
         logging.info(f'Processamento iniciado: {inicio} e finalizado: {final}')
