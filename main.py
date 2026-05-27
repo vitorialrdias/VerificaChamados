@@ -26,7 +26,7 @@ def main():
     inicio = datetime.now().strftime('%H:%M')
     
     email_destino = os.getenv("EMAIL_DESTINATARIO")
-    email_envio = os.getenv("EMAIL_ENVIO")
+    EMAIL_REMETENTE = os.getenv("EMAIL_REMETENTE")
     url_site= os.getenv("URL_SITE")
     
     try:
@@ -43,7 +43,7 @@ def main():
             
             if chamados:
             
-                email = EnvioEmail(destinatario=email_destino, conta_envio=email_envio)
+                email = EnvioEmail(destinatario=email_destino, conta_envio=EMAIL_REMETENTE)
                 header_html, linha_html = email.gerarTabelaHTML(chamados)
                 html_corpo = email.htmlEmail(header_html, linha_html)
                 envio_email = email.enviarEmail(html_corpo)

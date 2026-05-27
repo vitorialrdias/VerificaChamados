@@ -1,6 +1,8 @@
-import win32com.client
-import os, logging
-
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+import subprocess, logging, time, os
+from dotenv import load_dotenv
 
 def limpar_emails(lista):
     # Garante que emails válidos sejam separados por ponto e vírgula
@@ -22,6 +24,7 @@ class EnvioEmail:
         self.assunto = "Relatório - Chamados GPS Amigo"
         self.caminho_anexo = caminho_anexo
         self.conta_envio = conta_envio
+        self.senha = os.getenv("EMAIL_PASS")
 
     def gerarTabelaHTML(self, chamados):
         try:
@@ -99,27 +102,28 @@ class EnvioEmail:
             logging.info(f'Erro ao criar HTML: {e}')
             return None
 
-    def enviarEmail(self, html_corpo):
+
+    def enviarEmail(self, html_corpol):
+        """ Função para enviar email """
+        remetente = self.conta_envio
+        destinatario = self.destinatarios
+        senha = self.senha
+
+        if isinstance(destinatario, str):
+            destinatario = destinatario.split(',')
+
+        msg = MIMEMultipart()
+        msg['From'] = remetente
+        msg['To'] = ', '.join(destinatario)
+        msg['Subject'] = self.assunto
+
+        msg.attach(MIMEText(html_corpol, 'html', 'utf-8'))
+
         try:
-            outlook = win32com.client.Dispatch("Outlook.Application")
-            namespace = outlook.GetNamespace("MAPI")
-            mail = outlook.CreateItem(0)
-
-            mail.To = self.destinatarios
-            mail.Subject = self.assunto
-            mail.HTMLBody = html_corpo
-
-            # Define a conta de envio usando o método funcional via COM
-            for account in namespace.Accounts:
-                if account.SmtpAddress.lower() == self.conta_envio.lower():
-                    mail._oleobj_.Invoke(*(64209, 0, 8, 0, account))
-                    break
-            else:
-                return 'Erro'
-
-            mail.Send()
-            logging.info("Email enviado com sucesso.")
-            return 'Sucesso'
+            with smtplib.SMTP('smtp.office365.com', 587) as servidor:
+                servidor.starttls()
+                servidor.login(remetente, senha)
+                servidor.sendmail(remetente, destinatario, msg.as_string())
+                logging.info("E-mail enviado com sucesso!")
         except Exception as e:
-            logging.info(f'Erro no envio do e-mail: {e}')
-            return 'Erro'
+            logging.error(f"Erro ao enviar o e-mail: {e}")
