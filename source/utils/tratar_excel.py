@@ -14,7 +14,10 @@ def limpar_descricao(texto: str) -> str:
     # 3. Remover linhas que são SOMENTE saudação/fechamento/separador
     saudacoes_linha = re.compile(
         r'^\s*('
-        r'(bom\s+dia|boa\s+tarde|boa\s+noite)'
+        r'bom\s+dia'
+        r'|boa\s+tarde'
+        r'|boa\s+noite'
+        r'|por\s+gentileza'
         r'|ol[aá][\s,!.]*(\s*tudo\s+bem[?!.]*)?'
         r'|prezados?\s*(,|!|\(a\))?'
         r'|pessoal\s*[,!.]?'
@@ -23,7 +26,7 @@ def limpar_descricao(texto: str) -> str:
         r'|qualquer\s+d[uú]vida.*'
         r'|fico\s+[aà]\s+disposi[çc][aã]o.*'
         r'|podem\s+me\s+acionar.*'
-        r'|-{3,}'               # separadores ---
+        r'|-{3,}'
         r')\s*$',
         flags=re.IGNORECASE | re.MULTILINE
     )
@@ -33,7 +36,13 @@ def limpar_descricao(texto: str) -> str:
     #    Ex: "Boa tarde! Solicito..." → "Solicito..."
     texto = re.sub(
         r'^[\s\n]*'
-        r'(bom\s+dia|boa\s+tarde|boa\s+noite|ol[aá]|prezados?\s*(\(a\))?|pessoal)'
+        r'(bom\s+dia'
+        r'|boa\s+tarde'
+        r'|boa\s+noite'
+        r'|ol[aá]'
+        r'|prezados?\s*(\(a\))?'
+        r'|pessoal'
+        r'|por\s+gentileza)'
         r'[\s!,.:–-]+'
         r'(?=\S)',
         '',
@@ -107,7 +116,7 @@ def tratarExcel() -> str:
                     row["DATA ABERTURA"],
                     "%Y-%m-%d %H:%M:%S"
                 ).strftime("%d/%m"),
-                "descricao": limpar_descricao(str(row["DESCRIÇÃO"]))[:80],
+                "descricao": limpar_descricao(str(row["DESCRIÇÃO"]))[:100],
                 "prioridade": row["PRIORIDADE"],
                 "solicitante": row["USUÁRIO DE ABERTURA"],
                 "status": row["STATUS"]

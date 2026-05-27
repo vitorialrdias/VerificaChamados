@@ -22,15 +22,13 @@ class Navegador:
 
         options = Options()
         options.binary_location = edge_path
-        # As opções de options abaixo possibilita o login pelo usuário profissional
-        options.add_argument(f"--user-data-dir=C:/Users/{user}/AppData/Local/Microsoft/Edge/User Data")
-        options.add_argument(r"--profile-directory=Default")
-        
+
         # MODO HIDDEN 
         options.add_argument("--headless=new")
         options.add_argument("--disable-gpu")
 
         self.driver = webdriver.Edge(options=options)
+        self.driver.maximize_window()
 
         if self.url:
             self.driver.get(self.url)
@@ -41,15 +39,27 @@ class Navegador:
     def searchChamado(self) -> bool:
         try:
             wait = WebDriverWait(self.driver, 20)
-            time.sleep(1)
-
+            time.sleep(2)
+            
+            # Input login
+            input_login = wait.until(
+                EC.element_to_be_clickable((By.ID, os.getenv("INPUT_LOGIN")))
+            )
+            input_login.send_keys(os.getenv("USER"))
+            
+            # Input pass
+            input_pass = wait.until(
+                EC.element_to_be_clickable((By.ID, os.getenv("INPUT_PASS")))
+            )
+            input_pass.send_keys(os.getenv("PASS"))
+            
             # Botão Entrar
             btn_entrar = wait.until(
                 EC.element_to_be_clickable((By.ID, os.getenv("BTN_LOGIN")))
             )
             btn_entrar.click()
 
-            time.sleep(3)
+            time.sleep(5)
 
             # Botão acessar area dos chamados
             btn_amigo = wait.until(
@@ -57,7 +67,7 @@ class Navegador:
             )
             btn_amigo.click()
 
-            time.sleep(2)
+            time.sleep(8)
             self.driver.switch_to.window(self.driver.window_handles[-1])
             wait = WebDriverWait(self.driver, 30)
             
@@ -67,11 +77,19 @@ class Navegador:
             )
             self.driver.switch_to.frame(iframe)
             
-            time.sleep(6)
-            linhas = self.driver.find_elements(By.CSS_SELECTOR, "#table_my_queued tbody tr")
-            linhas = len(linhas)
-            if linhas > 1:
-                logging.info(linhas)
+            # espera tabela carregar
+            wait.until(
+                EC.presence_of_element_located((By.ID, "table_my_queued"))
+            )
+
+            time.sleep(10)
+            # verifica linhas do tbody
+            linhas = self.driver.find_elements(
+                By.CSS_SELECTOR,
+                "#table_my_queued tbody tr"
+            )
+            
+            if "Nenhum registro encontrado" not in linhas[0].text:
 
                 # Clica para exportar os dados dos chamados em aberto
                 self.driver.execute_script("document.querySelector(\"button[aria-controls='table_my_queued']\").click()")

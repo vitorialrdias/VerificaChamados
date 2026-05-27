@@ -29,7 +29,7 @@ class EnvioEmail:
 
             header_html = (
                 "<tr>" +
-                "".join(f"<th style='width:120px;'>{col}</th>" for col in colunas) +
+                "".join(f"<th style='width:100px;'>{col}</th>" for col in colunas) +
                 "</tr>"
             )
 
